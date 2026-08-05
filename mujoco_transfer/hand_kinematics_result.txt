@@ -1,0 +1,26 @@
+Body world positions/orientations at reset (READY_ARM_POSE):
+  right_wrist_yaw_link     pos_w=[-0.21686159074306488, 0.09515005350112915, 0.7168461084365845]  quat_w(wxyz)=[-0.36983323097229004, -0.5145476460456848, -0.5839201211929321, 0.5074459314346313]
+  right_hand_base_link     pos_w=[-0.22796286642551422, 0.10464471578598022, 0.6778863668441772]  quat_w(wxyz)=[0.0970599502325058, 0.04874454811215401, -0.7767535448074341, 0.6203686594963074]
+  right_hand_Link1_1       pos_w=[-0.30008864402770996, 0.10593269020318985, 0.6308752298355103]  quat_w(wxyz)=[0.0970599427819252, 0.04874454066157341, -0.7767534852027893, 0.6203685998916626]
+  right_hand_Link1_2       pos_w=[-0.2899453341960907, 0.10828351229429245, 0.6157231330871582]  quat_w(wxyz)=[0.0970599427819252, 0.048744551837444305, -0.7767534852027893, 0.6203685998916626]
+  right_hand_Link1_3       pos_w=[-0.29231008887290955, 0.11479225754737854, 0.5915048122406006]  quat_w(wxyz)=[0.0970599353313446, 0.048744555562734604, -0.7767535448074341, 0.6203685998916626]
+  right_hand_Link2_1       pos_w=[-0.17910057306289673, 0.13010498881340027, 0.6117192506790161]  quat_w(wxyz)=[0.09705996513366699, 0.04874454811215401, -0.7767534852027893, 0.6203686594963074]
+  right_hand_Link2_2       pos_w=[-0.19434382021427155, 0.13361802697181702, 0.6020599603652954]  quat_w(wxyz)=[0.0970599502325058, 0.04874454066157341, -0.7767535448074341, 0.6203685998916626]
+  right_hand_Link2_3       pos_w=[-0.20436808466911316, 0.11076620221138, 0.5724769830703735]  quat_w(wxyz)=[0.0970599576830864, 0.04874454438686371, -0.7767535448074341, 0.6203686594963074]
+
+Relative to right_wrist_yaw_link (world-frame offset, NOT yet rotated into wrist-local frame):
+  right_wrist_yaw_link     offset_from_wrist_world=[0.0, 0.0, 0.0]
+  right_hand_base_link     offset_from_wrist_world=[-0.01110127568244934, 0.009494662284851074, -0.03895974159240723]
+  right_hand_Link1_1       offset_from_wrist_world=[-0.08322705328464508, 0.0107826367020607, -0.08597087860107422]
+  right_hand_Link1_2       offset_from_wrist_world=[-0.07308374345302582, 0.0131334587931633, -0.10112297534942627]
+  right_hand_Link1_3       offset_from_wrist_world=[-0.07544849812984467, 0.01964220404624939, -0.1253412961959839]
+  right_hand_Link2_1       offset_from_wrist_world=[0.03776101768016815, 0.03495493531227112, -0.10512685775756836]
+  right_hand_Link2_2       offset_from_wrist_world=[0.022517770528793335, 0.038467973470687866, -0.11478614807128906]
+  right_hand_Link2_3       offset_from_wrist_world=[0.012493506073951721, 0.015616148710250854, -0.14436912536621094]
+
+Joint info for the finger joints:
+  right_hand_Joint1_1: joint_pos_limits=[-0.019999999552965164, 0.02449999935925007]
+  right_hand_Joint2_1: joint_pos_limits=[-0.019999999552965164, 0.02449999935925007]
+
+All joint names (to see if there's more than 1 joint per finger, e.g. coupled/mimic joints):
+['left_hip_pitch_joint', 'right_hip_pitch_joint', 'waist_yaw_joint', 'left_hip_roll_joint', 'right_hip_roll_joint', 'waist_roll_joint', 'left_hip_yaw_joint', 'right_hip_yaw_joint', 'waist_pitch_joint', 'left_knee_joint', 'right_knee_joint', 'left_shoulder_pitch_joint', 'right_shoulder_pitch_joint', 'left_ankle_pitch_joint', 'right_ankle_pitch_joint', 'left_shoulder_roll_joint', 'right_shoulder_roll_joint', 'left_ankle_roll_joint', 'right_ankle_roll_joint', 'left_shoulder_yaw_joint', 'right_shoulder_yaw_joint', 'left_elbow_joint', 'right_elbow_joint', 'left_wrist_roll_joint', 'right_wrist_roll_joint', 'left_wrist_pitch_joint', 'right_wrist_pitch_joint', 'left_wrist_yaw_joint', 'right_wrist_yaw_joint', 'left_hand_Joint1_1', 'left_hand_Joint2_1', 'right_hand_Joint1_1', 'right_hand_Joint2_1']

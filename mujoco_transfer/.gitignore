@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.log
+MUJOCO_LOG.TXT
+
+# Build intermediate: base64-embedded charts, fully regenerated from
+# trajectory_isaac.npz / trajectory_mujoco.npz by render_dashboard_charts.py.
+chart_data_uris.py
+
+# Symlink to the vendored unitree_ros clone (sibling repo, not included here).
+meshes
