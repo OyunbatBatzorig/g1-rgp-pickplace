@@ -9,19 +9,35 @@ verified independently, each handing off to the next:
 ```
 Policy 1 (Reach)        Policy 2 (Grasp + Lift)      Policy 3 (Place + Release)
 default ready pose  -->  cube grasped, lifted    -->  cube carried to goal marker,
-gripper open,             10cm off the table,          released, episode ends
+gripper open,             15cm off the table,          released, episode ends
 hand near cube             gripper closed
 ```
 
 Same scene throughout: G1 + Dex1 gripper, a table, a 3cm cube, and (from Policy 3
 on) a fixed goal marker. See [`g1_lift_rl/env_cfg_rgp_scene.py`](g1_lift_rl/env_cfg_rgp_scene.py).
 
+## What this repo is (and isn't) for
+
+The primary research question here is the **Isaac Lab → MuJoCo sim2sim transfer
+gap** — how well a PPO policy trained in one physics engine carries over to
+another, and why it does or doesn't. The trained policies are the *instrument*
+for measuring that gap, not a polished product in their own right.
+
+Concretely: if a checkpoint you train doesn't grasp reliably, lifts a bit
+short, or looks rougher than you'd expect from a finished robotics demo, that's
+a normal PPO training outcome — not necessarily something broken in your setup.
+Reward shaping, thresholds, and training length in this repo are starting
+points tuned enough to produce *some* transferable behavior to study, not
+exhaustively optimized for task success. If you want a stronger policy, that's
+a fair place to spend your own effort — see "Customization" below — but it's a
+secondary goal here, not the point of the exercise.
+
 ## Status
 
 | Policy | Env cfg | Trained | Verified | MuJoCo transfer |
 |---|---|---|---|---|
 | 1 — Reach | `env_cfg_rgp_reach.py` | done | done | done |
-| 2 — Grasp + lift | `env_cfg_rgp_grasp.py` | in progress (10cm) | pending | pending |
+| 2 — Grasp + lift | `env_cfg_rgp_grasp.py` | in progress (15cm) | pending | pending |
 | 3 — Place + release | not yet implemented | — | — | — |
 
 ## Quickstart

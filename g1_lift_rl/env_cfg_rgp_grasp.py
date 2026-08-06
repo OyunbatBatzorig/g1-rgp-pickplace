@@ -1,5 +1,5 @@
 # g1_lift_rl/env_cfg_rgp_grasp.py
-"""RGP chain, Policy 2: grasp the cube and lift it 10cm above the table.
+"""RGP chain, Policy 2: grasp the cube and lift it 15cm above the table.
 
 Resets the arm to Policy 1's own measured convergence pose
 (RGP_POLICY1_ARM_POSE in mdp/events_rgp.py) +- its measured per-joint noise,
@@ -10,7 +10,7 @@ geometry that depenetrates violently at reset.
 
 Same scene and observation functions as Policy 1 (no "inspect" concept in
 this chain). Rewards/terminations are fresh, following a grasp+lift shaping
-ladder (descend -> close_gradient -> grasp -> lift) with a 10cm lift cap.
+ladder (descend -> close_gradient -> grasp -> lift) with a 15cm lift cap.
 
 Guard: the action config below still points at the same RGP_G1_DEX1_CFG as
 Policy 1, unmodified. JointPositionActionCfg(use_default_offset=True) reads

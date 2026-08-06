@@ -69,3 +69,61 @@ transfer gap alone.
 Run `python3 compare_trajectories.py` (after both trajectory captures) for the numeric
 breakdown, or `python3 render_dashboard_charts.py && python3 build_dashboard.py` to
 regenerate the HTML dashboard.
+
+## RGP chain (Reach → Grasp+lift → Place+release) — status as of 2026-08-06
+
+Independent 3-policy chain, `g1_lift_rl/env_cfg_rgp_*.py` — see the repo root
+`README.md` for the chain design. Same MuJoCo methodology as Policy 1-4 above
+(physically-anchored gripper conversion, `<position>` actuators, deterministic
+per-step trajectory capture/compare); this section covers only what's new.
+
+Scripts: `build_scene_rgp.py`, `capture_isaac_trajectory_rgp_reach.py` /
+`_rgp_grasp.py`, `run_rgp_reach.py` / `run_rgp_grasp.py`,
+`compare_trajectories_rgp_reach.py` / `_rgp_grasp.py`. One shared scene
+(`g1_rgp_reach_scene.xml`) across both policies — same 3cm cube/table for the
+whole chain, no per-policy scene file needed. Observation space is uniform
+across the whole chain (36-dim, 8 terms), unlike the old chain's split
+39-dim/33-dim layouts.
+
+**Policy 1 (reach) — partial transfer, task-level good, joint-space diverges.**
+EE-to-cube distance transfers well (MuJoCo even slightly tighter than Isaac
+Lab); one clean, well-localized cube-graze contact event (steps 180-300 only,
+zero drift before/after). Arm joint-space still diverges substantially by
+episode end (mean 1.17 rad gap) — expected, since Policy 1 deliberately has no
+fixed joint-pose reward target (see `env_cfg_rgp_reach.py`'s docstring), so
+redundant-DOF resolution differs between simulators even when task-level
+behavior matches.
+
+**Policy 2 (grasp+lift, 15cm cap) — clean, severe transfer gap.** Matched
+starting state (arm pose taken from an actual Isaac Lab reset sample, not the
+mean — confirmed 0.0000 rad gap at t=0, so all divergence after that is
+attributable to the simulators). Isaac Lab locks into the grasp within ~0.2s
+and holds a stable 15cm lift for the full 8s episode. MuJoCo tracks closely
+enough to nearly succeed — two real lift attempts, the second reaching 13.8cm
+at t≈1.2s — but loses the grasp by t≈1.5s and never recovers: EE-to-object
+distance grows to 15-19cm, final arm joint-space gap 3.17 rad, raw policy
+action output visibly noisy in the second half (consistent with
+out-of-distribution observations once contact is lost). Same failure category
+as this file's own Policy 1/Policy 2 findings above (thin-margin policy +
+closed-loop amplification of small simulator differences), more severe here
+since losing a sustained grasp cascades into unbounded divergence rather than
+a gradual separation.
+
+**New finding — static kinematic offset, independent of dynamics.** With
+IDENTICAL joint angles at reset (0.0000 rad gap), MuJoCo's forward kinematics
+placed the end-effector 3.1cm from where Isaac Lab's did, propagating into the
+cube's coupled spawn position (cube = ee_fk − GRASP_OFFSET). A geometry
+discrepancy between the USD and MJCF robot models that exists before any
+physics runs — not previously isolated in the Policy 1-4 findings above; worth
+checking whether it's present there too now that the technique exists to
+measure it.
+
+**Caveat**: single deterministic rollout per simulator, not a success-rate
+comparison. Isaac Lab's own 95% grasp+lift success rate (61/64 envs, filtered
+to genuinely-grasping-and-lifted-≥2cm) came from a 64-env parallel
+deterministic replay; MuJoCo has only been sampled once with one matched seed.
+A multi-seed MuJoCo sweep would be needed for a directly comparable
+MuJoCo-side success rate.
+
+Artifacts: `trajectory_comparison_rgp_reach.png`/`_joints.png`,
+`trajectory_comparison_rgp_grasp.png`/`_joints.png`.

@@ -42,7 +42,7 @@ DISTURBANCE_VEL_CAP_RGP = 2.0      # m/s -- hard cap before computing the penalt
 GRASP_DIST_RGP = 0.04               # m -- enveloped: EE within this of cube centre
 GRIP_CLOSED_THRESHOLD_RGP = -0.018  # rad -- measured gripper position when physically
                                      # blocked closed by the cube (the joint never reaches its own hard limit)
-LIFT_CAP_RGP = 0.10                 # m -- lift reward saturates at 10cm real height
+LIFT_CAP_RGP = 0.15                 # m -- lift reward saturates at 15cm real height
 _CUBE_REST_Z_RGP = TABLE_TOP_Z + RGP_BLOCK_SIZE / 2.0  # cube's resting centre height,
                                      # the lift-height baseline (never TABLE_TOP_Z directly,
                                      # or the reward pays out before any real lift happens)

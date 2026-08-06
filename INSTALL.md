@@ -8,6 +8,11 @@ Tested with: Isaac Lab 2.3.2, Isaac Sim 5.1.0, Python 3.11, Ubuntu 24.04. Isaac 
 APIs move fast between releases — if a step below errors on a newer/older install, check
 Isaac Lab's own changelog before assuming this guide is wrong.
 
+Before you train anything: read README.md's "What this repo is (and isn't) for". The
+point of this project is measuring the Isaac Lab → MuJoCo transfer gap, not shipping a
+polished policy — a checkpoint that grasps inconsistently or lifts short of the cap is
+expected PPO output to study, not a sign your setup is broken.
+
 ## Step 1 — Install Isaac Lab
 
 Follow NVIDIA's own guide:

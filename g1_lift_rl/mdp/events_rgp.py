@@ -38,6 +38,32 @@ RGP_POLICY1_ARM_POSE_STD = {
     "right_wrist_yaw_joint": 0.0457,
 }
 
+# Policy 2's own measured convergence pose (deterministic replay, 64 envs,
+# filtered to the 61 that were GENUINELY grasping+lifted >2cm at measurement
+# time -- averaging in the dropped/failed envs would corrupt this with
+# garbage poses). Same "measure what actually happens" discipline as Policy 1
+# -- Policy 3's reset target: arm pose + gripper CLOSED (holding the cube),
+# not open like Policy 1->2's handoff.
+RGP_POLICY2_ARM_POSE = {
+    "right_shoulder_pitch_joint": -0.2812,
+    "right_shoulder_roll_joint": 0.0343,
+    "right_shoulder_yaw_joint": 0.9457,
+    "right_elbow_joint": 0.3432,
+    "right_wrist_roll_joint": -1.3265,
+    "right_wrist_pitch_joint": 0.7642,
+    "right_wrist_yaw_joint": -1.4318,
+}
+RGP_POLICY2_ARM_POSE_STD = {
+    "right_shoulder_pitch_joint": 0.0761,
+    "right_shoulder_roll_joint": 0.0253,
+    "right_shoulder_yaw_joint": 0.0235,
+    "right_elbow_joint": 0.0935,
+    "right_wrist_roll_joint": 0.1625,
+    "right_wrist_pitch_joint": 0.2158,
+    "right_wrist_yaw_joint": 0.1878,
+}
+RGP_POLICY2_GRIPPER_CLOSED = 0.0060  # rad -- measured closed value, both finger joints
+
 
 def reset_robot_to_default_rgp(
     env: ManagerBasedEnv,
