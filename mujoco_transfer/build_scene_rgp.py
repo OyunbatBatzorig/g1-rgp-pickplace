@@ -33,6 +33,11 @@ BLOCK_SIZE = 0.03
 BLOCK_INIT_POS = (-0.065, -0.349, TABLE_TOP_Z + BLOCK_SIZE / 2.0)
 CUBE_ROT = (0.9945, 0.0, 0.0, 0.1045)  # (w,x,y,z) -- same as old chain, unchanged
 
+# Policy 3/4's goal marker (env_cfg_rgp_scene.py's RGP_GOAL_POS xy, sitting
+# flush on the table like the Isaac Lab disc -- TABLE_TOP_Z, not the cube's
+# own resting-centre height). Visual-only: no collision, no joint.
+GOAL_MARKER_POS = (0.070, -0.389, TABLE_TOP_Z)
+
 tree = ET.parse("g1_dex1_native.xml")
 root = tree.getroot()
 
@@ -188,6 +193,21 @@ ET.SubElement(
         "pos": f"{TABLE_POS[0]} {TABLE_POS[1]} {TABLE_POS[2]}",
         "size": f"{half_table[0]} {half_table[1]} {half_table[2]}",
         "rgba": "0.6 0.55 0.5 1",
+    }
+)
+
+# Goal marker (yellow disc, matching Isaac Lab's RGPSceneCfg.goal exactly --
+# same position, same 5cm radius/2mm-thick cylinder). Non-colliding
+# (contype/conaffinity 0) so it can never physically interact with anything.
+ET.SubElement(
+    worldbody, "geom", {
+        "name": "goal_marker",
+        "type": "cylinder",
+        "pos": f"{GOAL_MARKER_POS[0]} {GOAL_MARKER_POS[1]} {GOAL_MARKER_POS[2]}",
+        "size": "0.05 0.001",
+        "rgba": "1.0 1.0 0.0 1",
+        "contype": "0",
+        "conaffinity": "0",
     }
 )
 

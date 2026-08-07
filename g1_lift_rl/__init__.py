@@ -367,3 +367,43 @@ gym.register(
         "rsl_rl_cfg_entry_point": f"{__name__}.agents.rsl_rl_ppo_cfg_rgp:G1RGPGraspPPORunnerCfg",
     },
 )
+
+gym.register(
+    id="Isaac-G1-RGP-Place-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.env_cfg_rgp_place:G1RGPPlaceEnvCfg",
+        "rsl_rl_cfg_entry_point": f"{__name__}.agents.rsl_rl_ppo_cfg_rgp:G1RGPPlacePPORunnerCfg",
+    },
+)
+
+gym.register(
+    id="Isaac-G1-RGP-Place-Play-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.env_cfg_rgp_place:G1RGPPlaceEnvCfg_PLAY",
+        "rsl_rl_cfg_entry_point": f"{__name__}.agents.rsl_rl_ppo_cfg_rgp:G1RGPPlacePPORunnerCfg",
+    },
+)
+
+gym.register(
+    id="Isaac-G1-RGP-Release-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.env_cfg_rgp_release:G1RGPReleaseEnvCfg",
+        "rsl_rl_cfg_entry_point": f"{__name__}.agents.rsl_rl_ppo_cfg_rgp:G1RGPReleasePPORunnerCfg",
+    },
+)
+
+gym.register(
+    id="Isaac-G1-RGP-Release-Play-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.env_cfg_rgp_release:G1RGPReleaseEnvCfg_PLAY",
+        "rsl_rl_cfg_entry_point": f"{__name__}.agents.rsl_rl_ppo_cfg_rgp:G1RGPReleasePPORunnerCfg",
+    },
+)

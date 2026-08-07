@@ -3,7 +3,11 @@
 chain: robot, table, cube. Independent of the old 4-policy chain's env_cfg.py
 (no subclassing), built from the same physical constants in constants.py.
 
-Policy 3 subclasses RGPSceneCfg to add the goal marker; Policy 1/2 don't need it.
+The goal marker (yellow disc at RGP_GOAL_POS, visual-only) lives here so all
+four policies show it during playback, even though only Policy 3/4's rewards
+actually reference RGP_GOAL_POS -- purely for consistent GUI viewing across
+the chain, no effect on Policy 1/2's observations, rewards, or trained
+checkpoints (kinematic, massless, no collision, not in any obs term).
 """
 import isaaclab.sim as sim_utils
 from isaaclab.actuators import ImplicitActuatorCfg
@@ -14,11 +18,17 @@ from isaaclab.utils import configclass
 from .constants import (
     ROBOT_USD, ROBOT_POS, ROBOT_ROT, READY_ARM_POSE, LEFT_ARM_STOW,
     GRIPPER_OPEN, TABLE_POS, TABLE_SIZE, BLOCK_SIZE, BLOCK_INIT_POS, CUBE_ROT,
-    TABLE_TOP_Z,
+    TABLE_TOP_Z, GOAL_POS,
 )
 
 RGP_BLOCK_SIZE = 0.03  # cube edge length (m)
 RGP_BLOCK_INIT_POS = (BLOCK_INIT_POS[0], BLOCK_INIT_POS[1], TABLE_TOP_Z + RGP_BLOCK_SIZE / 2.0)
+
+# Goal xy reused from the old chain's own GOAL_POS (an arbitrary but already-
+# established table placement, not tied to cube size); z recomputed for THIS
+# scene's 3cm cube (old GOAL_POS's z was calibrated for the old chain's 6cm
+# cube) so a resting cube's centre at the goal matches RGP_BLOCK_SIZE.
+RGP_GOAL_POS = (GOAL_POS[0], GOAL_POS[1], TABLE_TOP_Z + RGP_BLOCK_SIZE / 2.0)
 
 # ---------------------------------------------------------------------------
 # Robot
@@ -92,4 +102,21 @@ class RGPSceneCfg(InteractiveSceneCfg):
                 static_friction=10.0, dynamic_friction=1.5, restitution=0.0),
         ),
         init_state=RigidObjectCfg.InitialStateCfg(pos=RGP_BLOCK_INIT_POS, rot=CUBE_ROT),
+    )
+    # Visual-only marker (flat disc, kinematic, massless, no collision) at the
+    # goal's xy -- purely a reference for where reward_place_rgp/
+    # reward_release_rgp actually check, can't be pushed or interacted with.
+    # Sits at TABLE_TOP_Z (not RGP_GOAL_POS's own z, which is the cube's
+    # resting CENTRE height) so the disc lies flush on the table rather than
+    # floating half the cube's height above it.
+    goal = AssetBaseCfg(
+        prim_path="{ENV_REGEX_NS}/Goal",
+        spawn=sim_utils.CylinderCfg(
+            radius=0.05, height=0.002,
+            rigid_props=sim_utils.RigidBodyPropertiesCfg(kinematic_enabled=True),
+            mass_props=sim_utils.MassPropertiesCfg(mass=0.0),
+            collision_props=sim_utils.CollisionPropertiesCfg(collision_enabled=False),
+            visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(1.0, 1.0, 0.0)),
+        ),
+        init_state=AssetBaseCfg.InitialStateCfg(pos=(RGP_GOAL_POS[0], RGP_GOAL_POS[1], TABLE_TOP_Z)),
     )

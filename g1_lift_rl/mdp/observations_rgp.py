@@ -71,6 +71,15 @@ def hand_base_to_object_rgp(env: ManagerBasedRLEnv) -> torch.Tensor:
     return _safe(obj.data.root_pos_w - base_pos)
 
 
+def object_to_goal_rgp(env: ManagerBasedRLEnv) -> torch.Tensor:
+    """Vector from the cube to the goal position. (N, 3) Policy 3 only --
+    Reach/Grasp have no goal concept."""
+    from ..env_cfg_rgp_scene import RGP_GOAL_POS
+    obj: RigidObject = env.scene["object"]
+    goal = torch.tensor(RGP_GOAL_POS, device=env.device)
+    return _safe(goal - obj.data.root_pos_w + env.scene.env_origins)
+
+
 def last_action_rgp(env: ManagerBasedRLEnv) -> torch.Tensor:
     """Previous step's raw action vector, defensively clipped -- a runaway raw
     action value has been observed to feed back through this term before."""

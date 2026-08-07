@@ -107,8 +107,9 @@ This doesn't produce a usable checkpoint — it's a plumbing check.
 
 ## Step 7 — Train
 
-Train **in order** — Policy 2's reset pose is measured from Policy 1's own trained
-behavior (see README.md → "Chaining policies"), so Policy 1 needs a checkpoint first.
+Train **in order** — each policy's reset state is measured from the previous policy's own
+trained, real behavior (see README.md → "Chaining policies"), so each one needs the
+previous one's checkpoint (and, from Policy 3 on, a captured-states file) to already exist.
 
 ```bash
 cd ../IsaacLab
@@ -121,12 +122,39 @@ conda activate env_isaaclab
     --task Isaac-G1-RGP-Grasp-v0 --headless
 ```
 
-Common flags: `--num_envs <N>` (defaults are set per-task, 2048 for Reach / 1024 for
-Grasp — see the Gym IDs table in README.md), `--max_iterations <N>` (default 1500),
-`--seed <N>`. Checkpoints land in
+After Policy 2 finishes, capture its real held-cube states before training Policy 3 — its
+reset samples from this file, not a reconstructed state:
+```bash
+./isaaclab.sh -p ../g1_lift_ext/capture_policy2_held_states.py \
+    --checkpoint logs/rsl_rl/g1_rgp_grasp/<run>/model_<N>.pt \
+    --out ../g1_lift_ext/g1_lift_rl/policy2_held_states.pt
+./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py \
+    --task Isaac-G1-RGP-Place-v0 --headless
+```
+
+Same pattern for Policy 3 → 4:
+```bash
+./isaaclab.sh -p ../g1_lift_ext/capture_policy3_settled_states.py \
+    --checkpoint logs/rsl_rl/g1_rgp_place/<run>/model_<N>.pt \
+    --out ../g1_lift_ext/g1_lift_rl/policy3_settled_states.pt
+./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py \
+    --task Isaac-G1-RGP-Release-v0 --headless
+```
+
+Common flags: `--num_envs <N>` (defaults are set per-task — 2048 for Reach, 1024 for
+Grasp/Place/Release, see the Gym IDs table in README.md), `--max_iterations <N>` (default
+1500), `--seed <N>`, `--resume --load_run <run_dir> --checkpoint <name> --max_iterations
+<N>` (continue training an existing run for `N` *additional* iterations past wherever it
+left off). Checkpoints land in
 `IsaacLab/logs/rsl_rl/<experiment_name>/<timestamp>/model_<iter>.pt`
-(`experiment_name` is `g1_rgp_reach` / `g1_rgp_grasp`, set in
-[`agents/rsl_rl_ppo_cfg_rgp.py`](g1_lift_rl/agents/rsl_rl_ppo_cfg_rgp.py)).
+(`experiment_name` is `g1_rgp_reach` / `g1_rgp_grasp` / `g1_rgp_place` / `g1_rgp_release`,
+set in [`agents/rsl_rl_ppo_cfg_rgp.py`](g1_lift_rl/agents/rsl_rl_ppo_cfg_rgp.py)).
+
+Before committing to a full run of a newly-written or newly-edited reward term, smoke-test
+it first with a short run (`--max_iterations 5` to `150` depending on what you're checking)
+— several real bugs in this project's own history (see README.md → "Reward design notes")
+only became visible after a full 1500-iteration run, specifically because they were
+threshold/scale mismatches invisible in early iterations.
 
 ## Step 8 — See the results
 
@@ -135,6 +163,8 @@ small number of environments:
 ```bash
 ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py --task Isaac-G1-RGP-Reach-Play-v0
 ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py --task Isaac-G1-RGP-Grasp-Play-v0
+./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py --task Isaac-G1-RGP-Place-Play-v0
+./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py --task Isaac-G1-RGP-Release-Play-v0
 ```
 Pass `--checkpoint <path/to/model_N.pt>` to pick a specific run instead of the latest.
 `play.py` also exports a TorchScript policy to
@@ -144,24 +174,37 @@ below load.
 **Read the training curves:**
 ```bash
 cd ../IsaacLab
-tensorboard --logdir logs/rsl_rl/g1_rgp_reach   # or g1_rgp_grasp
+tensorboard --logdir logs/rsl_rl/g1_rgp_reach   # or g1_rgp_grasp / g1_rgp_place / g1_rgp_release
 ```
 Curve convergence alone isn't proof of a working policy in this project's own experience —
-prefer watching it live (above) or a deterministic (no-exploration-noise) replay before
-trusting a checkpoint enough to hand it to the next policy in the chain.
+prefer watching it live (above), or a deterministic (no-exploration-noise) replay that
+directly checks the actual reward/state functions against a live checkpoint, before
+trusting a checkpoint enough to hand it to the next policy in the chain. Both major bugs
+documented in README.md → "Reward design notes" produced training curves that, on their
+own, looked like a normal (if underperforming) run.
 
 **Verify sim2sim in MuJoCo** — replays the same exported checkpoint outside Isaac Sim
 entirely and compares the two trajectories step-by-step (needs Step 3's `unitree_ros`
-meshes):
+meshes, and the `unitree_sim_env` conda env for the MuJoCo-side scripts — `env_isaaclab`
+doesn't have the `mujoco` package installed):
 ```bash
 cd g1_lift_ext/mujoco_transfer
-python3 build_scene_rgp.py
-python3 capture_isaac_trajectory_rgp_reach.py --checkpoint <path/to/exported/policy.pt>
-python3 run_rgp_reach.py --save_trajectory
+conda activate env_isaaclab
+python3 build_scene_rgp.py   # regenerates g1_rgp_reach_scene.xml; gitignored, not checked in
+
+cd ../../IsaacLab
+./isaaclab.sh -p ../g1_lift_ext/mujoco_transfer/capture_isaac_trajectory_rgp_reach.py \
+    --policy_path <path/to/exported/policy.pt>
+
+cd ../g1_lift_ext/mujoco_transfer
+conda activate unitree_sim_env
+python3 run_rgp_reach.py --save_trajectory trajectory_mujoco_rgp_reach.npz
 python3 compare_trajectories_rgp_reach.py
 ```
-See README.md → "MuJoCo sim2sim transfer" for what each script does and how to adapt the
-`_rgp_reach` scripts to Policy 2.
+Swap `_rgp_reach` for `_rgp_grasp` / `_rgp_place` / `_rgp_release` for the other three
+policies — all four follow the same four-script pattern. See README.md → "MuJoCo sim2sim
+transfer" for what each script does and this project's actual transfer-gap findings per
+policy.
 
 ## Troubleshooting
 
