@@ -109,53 +109,6 @@ g1_lift_ext/
 └── setup.py
 ```
 
-The old 4-policy chain (`env_cfg.py`, `env_cfg_policy2/3/4.py`,
-`mdp/{rewards,observations,terminations,events}.py`) lives in the same package —
-it's an earlier, independent iteration on the same task, kept for comparison.
-The files above are the complete RGP-specific set; nothing else in `g1_lift_rl/`
-is required to train or run RGP.
-
-### Chaining policies
-
-Each policy's reset state for the *next* policy is **measured from a real rollout, not
-guessed or reconstructed**:
-
-- **Policy 1 → 2**: train Policy 1, run a deterministic (no-exploration-noise) replay,
-  record the mean and per-joint std of its converged arm pose. `mdp/events_rgp.py`'s
-  `RGP_POLICY1_ARM_POSE`/`_STD` is this measurement; Policy 2 samples its reset from it,
-  then couples the cube to the arm's *actual* resulting fingertip position
-  (`cube = ee_fk - GRASP_OFFSET`) rather than jittering both independently — independent
-  jittering occasionally produced a physically-overlapping reset that depenetrated
-  violently (up to 200+ m/s cube launch velocities, measured).
-- **Policy 2 → 3**: `capture_policy2_held_states.py` runs Policy 2's trained checkpoint
-  and saves every environment's real (arm pose, gripper pose, cube position) at the
-  moment it's genuinely holding the cube, to `policy2_held_states.pt`. Policy 3's reset
-  (`reset_robot_then_couple_cube_grasping_rgp`) samples a real captured state from this
-  library — not a synthesized one — so the cube is already validly grasped from frame 0.
-- **Policy 3 → 4**: same pattern, one stage later —
-  `capture_policy3_settled_states.py` captures real (settled at goal, still gripping)
-  states to `policy3_settled_states.pt`; Policy 4's reset
-  (`reset_robot_then_couple_cube_settled_rgp`) samples from it.
-
-Two structural subtleties worth knowing before writing a new policy or debugging a stuck
-one:
-
-1. **Action baseline.** Isaac Lab's `JointPositionActionCfg(use_default_offset=True)`
-   snapshots the articulation's `init_state.joint_pos` **once, at environment
-   construction**, and never re-reads it — a reset event can move the robot anywhere, but
-   if a freshly-initialized policy's actual reset pose doesn't match that static baseline,
-   it has to output a large one-shot correction just to hold still, which an untrained
-   policy generally can't do. Policy 1/2 share one baseline (`RGP_G1_DEX1_CFG`); Policy 3
-   and 4 each needed their **own dedicated** baseline (`RGP_G1_DEX1_PLACE_CFG`,
-   `RGP_G1_DEX1_RELEASE_CFG`, built from their own captured reset pose) once their reset
-   state diverged enough from the shared default. Getting this wrong was the actual root
-   cause of Policy 3's first training failure.
-2. **Gripper reset: state vs. target.** The gripper's joint *state* is written to its real,
-   mechanically-blocked captured value, but the drive *target* is written to full closure
-   — if target equals state, the PD controller computes zero corrective force and the cube
-   falls immediately at reset, regardless of anything the policy does. This applies on both
-   the Isaac Lab side (`events_rgp.py`) and the MuJoCo side (`run_rgp_*.py`).
-
 ## Reward design notes
 
 Two non-obvious reward-shaping bugs were found this project and are worth knowing about
