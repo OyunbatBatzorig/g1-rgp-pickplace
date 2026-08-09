@@ -39,7 +39,7 @@ secondary goal here, not the point of the exercise.
 
 | Policy | Env cfg | Trained | Verified | MuJoCo transfer |
 |---|---|---|---|---|
-| 1 — Reach | `env_cfg_rgp_reach.py` | done | done (deterministic replay) | clean, no measurable gap |
+| 1 — Reach | `env_cfg_rgp_reach.py` | done | done (deterministic replay) | unintended cube contact, tracking of moved object gap |
 | 2 — Grasp + lift | `env_cfg_rgp_grasp.py` | done | done | near-success (92% of lift height), grasp lost gradually ~step 150 |
 | 3 — Place | `env_cfg_rgp_place.py` | done | done (32-env deterministic replay, 31/32 sustained) | grasp lost almost instantly (~6 steps); documented known gap, not further chased |
 | 4 — Release + return | `env_cfg_rgp_release.py` | done | done (direct joint-space + EE-clearance diagnostics) | smallest joint-space gap of the chain (~0.14 rad); `arm_dist_to_ready` nearly identical between engines |
@@ -202,7 +202,7 @@ python3 compare_trajectories_rgp_release.py
 
 Findings so far (also in the Status table above): transfer difficulty tracks how much of a
 policy's success depends on sustained, fine-margin contact rather than approach or
-positioning. Reach (no contact dependency) transfers cleanly; Grasp+lift (first sustained
+positioning. Reach (minimal contact dependency) unintended cube contact caused displacement and subsequent tracking of the moved object; Grasp+lift (first sustained
 grip) loses it gradually around step 150; Place (grip inherited from Grasp, one handoff
 further from the original contact) loses it almost instantly; Release+return (opens the
 gripper deliberately, then moves through free space) shows the smallest joint-space gap of
